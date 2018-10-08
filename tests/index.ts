@@ -125,7 +125,16 @@ export function test_object_5(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'b'},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'c'}]));
 }
-
+export function test_object_invalid(): i32 {
+  return check(
+    parse('{"a"\n0}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{"a"\n0}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{"a", 0}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{"a": {2}}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{"a": {2: 3}}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{"a": {"a": 2 3}}', JsmnErr.JSMN_ERROR_INVAL, 5, [])
+  );
+}
 
 /*----------  test_array  ----------*/
 
@@ -134,7 +143,9 @@ export function test_array_1(): i32 {
         [{type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 1, value: ''},
         {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: 0, value: '10'}]));
 }
-
+export function test_array_2(): i32 {
+  return check(parse('{"a": 1]', JsmnErr.JSMN_ERROR_INVAL, 3, []));
+}
 
 /*----------  test_primitive  ----------*/
 
@@ -144,6 +155,31 @@ export function test_primitive_1(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'boolVar'},
           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: 'true'}]));
 }
+export function test_primitive_2(): i32 {
+  return check(parse('{"boolVar" : false }', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'boolVar'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: 'false'}]));
+}
+export function test_primitive_3(): i32 {
+  return check(parse('{"nullVar" : null }', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'nullVar'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: 'null'}]));
+}
+export function test_primitive_4(): i32 {
+  return check(parse('{"intVar" : 12 }', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'intVar'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '12'}]));
+}
+export function test_primitive_5(): i32 {
+  return check(parse('{"floatVar" : 12.345 }', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'floatVar'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '12.345'}]));
+}
+
 
 /*----------  test_string  ----------*/
 
@@ -195,6 +231,43 @@ export function test_string_8(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
           {type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 1, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: '\\u0280'}]));
+}
+export function test_string_invalid(): i32 {
+  return check(
+    parse('{\"a\":\"str\\uFFGFstr\"}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{\"a\":\"str\\u@FfF\"}', JsmnErr.JSMN_ERROR_INVAL, 3, []) &&
+    parse('{{\"a\":[\"\\u028\"]}', JsmnErr.JSMN_ERROR_INVAL, 4, [])
+  );
+}
+
+export function test_partial_string(): i32 {
+  let r: i32;
+  let p = new JsmnParser();
+  let fails: i32 = 0;
+  let success: i32 = 0;
+
+  const nTokens = 5;
+  let tok = new Array<JsmnToken>(nTokens);
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+
+  const js: string = '{"x": "va\\\\ue", "y": "value y"}';
+
+  for (let i: i32 = 1; i <= js.length; i++) {
+    r = jsmnParse(p, js, i, tok, nTokens);
+    if (i == js.length) {
+      fails += check(r == 5);
+      fails += check(tokeq(js, tok, nTokens,
+          [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'x'},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'va\\\\ue'},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'y'},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'value y'}]));
+    } else {
+      fails += check(r == JsmnErr.JSMN_ERROR_PART);
+    }
+  }
+  return fails;
 }
 
 

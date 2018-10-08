@@ -89,7 +89,7 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 	let start: i32 = parser.pos;
 	let found: boolean = false;
 
-	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
+	for (; parser.pos < len; parser.pos++) {
 		debug(js[parser.pos]);
 		switch (js.charCodeAt(parser.pos)) {
 			case '\t'.charCodeAt(0): case '\r'.charCodeAt(0): case '\n'.charCodeAt(0): case ' '.charCodeAt(0):
@@ -141,7 +141,7 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 	parser.pos++;
 
 	/* Skip starting quote */
-	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
+	for (; parser.pos < len; parser.pos++) {
 		let c: i32 = js.charCodeAt(parser.pos);
 		debug(js[parser.pos]);
 		/* Quote: end of string */
@@ -204,7 +204,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	let token: JsmnToken;
 	let count: i32 = parser.toknext;
 
-	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
+	for (; parser.pos < len; parser.pos++) {
 		let c: i32
 		let type: JsmnType;
 		debug(js[parser.pos]);
@@ -299,12 +299,12 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	}
 
 	// if (tokens != NULL) {
-	// 	for (i = parser.toknext - 1; i >= 0; i--) {
-	// 		 Unmatched opened object or array 
-	// 		if (tokens[i].start != -1 && tokens[i].end == -1) {
-	// 			return JsmnErr.JSMN_ERROR_PART;
-	// 		}
-	// 	}
+	for (i = parser.toknext - 1; i >= 0; i--) {
+		 //Unmatched opened object or array 
+		if (tokens[i].start != -1 && tokens[i].end == -1) {
+			return JsmnErr.JSMN_ERROR_PART;
+		}
+	}
 	// }
 
 	return count;
