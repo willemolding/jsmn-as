@@ -374,4 +374,102 @@ export function test_issue_27(): i32 {
 }
 
 
+export function test_input_length(): i32 {
+  const nTokens = 10;
+  let tok = new Array<JsmnToken>(nTokens);
+
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+
+
+  const js: string = '{"a": 0}garbage';
+
+  let p = new JsmnParser();
+
+  let r: i32 = jsmnParse(p, js, js.length, tok, nTokens);
+  return check(tokeq(js, tok, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+      {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
+      {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '0'}]));
+}
+
+
+export function test_count(): i32 {
+
+  const nTokens = 10;
+  let tok = new Array<JsmnToken>(nTokens);
+
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+
+  let js: string;
+  let fails: i32 = 0;
+  let p: JsmnParser
+
+  js = "{}";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 1);
+
+  js = "[]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 1);
+
+  js = "[[]]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 2);
+
+  js = "[[], []]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 3);
+
+  js = "[[], []]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 3);
+
+  js = "[[], [[]], [[], []]]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 7);
+
+  js = "[\"a\", [[], []]]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 5);
+
+  js = "[[], \"[], [[]]\", [[]]]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 5);
+
+  js = "[1, 2, 3]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 4);
+
+  js = "[1, 2, [3, \"a\"], null]";
+  p = new JsmnParser();
+  fails += check(jsmnParse(p, js, js.length, tok, nTokens) == 7);
+
+  return fails;
+}
+
+export function test_unmatched_brackets(): i32 {
+
+  let js: string;
+  let fails: i32 = 0;
+
+  js = '"key 1": 1234}';
+  fails += check(parse(js, JsmnErr.JSMN_ERROR_INVAL, 2, []));
+  js = '{"key 1": 1234';
+  fails += check(parse(js, JsmnErr.JSMN_ERROR_PART, 3, []));
+  js = '{"key 1": 1234}}';
+  fails += check(parse(js, JsmnErr.JSMN_ERROR_INVAL, 3, []));
+  js = '"key 1"}: 1234';
+  fails += check(parse(js, JsmnErr.JSMN_ERROR_INVAL, 3, []));
+  js = '{"key {1": 1234}';
+  fails += check(parse(js, 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: 0, end: 16, size: 1, value: ''},
+      {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'key {1'},
+      {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '1234'}]));
+  js = "{{\"key 1\": 1234}";
+  fails += check(parse(js, JsmnErr.JSMN_ERROR_PART, 4, []));
+  return fails;
+}
+
 /*=====  End of Ported Tests  ======*/
