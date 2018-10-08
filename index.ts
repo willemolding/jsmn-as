@@ -88,14 +88,14 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
 	let found: boolean = false;
+
 	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
 		debug(js[parser.pos]);
 		switch (js.charCodeAt(parser.pos)) {
-			/* In strict mode primitive must be followed by "," or "}" or "]" */
-			case '\t'.charCodeAt(0) : case '\r'.charCodeAt(0) : case '\n'.charCodeAt(0) : case ' '.charCodeAt(0) :
-			case ','.charCodeAt(0)  : case ']'.charCodeAt(0)  : case '}'.charCodeAt(0) :
-				found = true;
-				debug("found end of primitive")
+			case '\t'.charCodeAt(0): case '\r'.charCodeAt(0): case '\n'.charCodeAt(0): case ' '.charCodeAt(0):
+			case ','.charCodeAt(0): case ']'.charCodeAt(0): case '}'.charCodeAt(0):
+				// goto found;
+				debug("found end of primitive");
 				break;
 		}
 		if (js.charCodeAt(parser.pos) < 32 || js.charCodeAt(parser.pos) >= 127) {
@@ -104,22 +104,20 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		}
 	}
 	/* In strict mode primitive must be followed by a comma/object/array */
-	if(!found) {
-		parser.pos = start;
-		return JsmnErr.JSMN_ERROR_PART;
-	}
+	// This is if the for loop exits without found being flagged
+	// parser.pos = start;
+	// return JsmnErr.JSMN_ERROR_PART;
 
-
+// found:
 	// if (tokens == NULL) {
 	// 	parser.pos--;
 	// 	return 0;
 	// }
 	token = jsmn_alloc_token(parser, tokens, nTokens);
-	// if (tokens == NULL) {
+	// if (token == NULL) {
 	// 	parser.pos = start;
 	// 	return JsmnErr.JSMN_ERROR_NOMEM;
 	// }
-
 	jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, start, parser.pos);
 	token.parent = parser.toksuper;
 	parser.pos--;
@@ -270,14 +268,6 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 						tokens[parser.toksuper].type != JsmnType.JSMN_ARRAY &&
 						tokens[parser.toksuper].type != JsmnType.JSMN_OBJECT) {
 					parser.toksuper = tokens[parser.toksuper].parent;
-					for (i = parser.toknext - 1; i >= 0; i--) {
-						if (tokens[i].type == JsmnType.JSMN_ARRAY || tokens[i].type == JsmnType.JSMN_OBJECT) {
-							if (tokens[i].start != -1 && tokens[i].end == -1) {
-								parser.toksuper = i;
-								break;
-							}
-						}
-					}
 				}
 				break;
 			/* In strict mode primitives are: numbers and booleans */

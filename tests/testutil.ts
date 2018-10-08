@@ -14,6 +14,8 @@ export class TestToken {
 export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected: Array<TestToken>): boolean {
 	if (numtok > 0) {
 		for (let i: i32 = 0; i < numtok; i++) {
+			debug_int(tokens[i].start);
+			debug_int(tokens[i].end);
 
 			if (tokens[i].type != expected[i].type) {
 				debug("token type not correct. Actual type was");
