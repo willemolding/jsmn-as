@@ -69,14 +69,16 @@ export function parse(s: string, status: i32, numtok: i32, expected: Array<TestT
 
 	r = jsmnParse(p, s, s.length, t, numtok);
 	if (r != status) {
-		// printf("status is %d, not %d\n", r, status);
+		debug("status code not ok. Actual status code:");
+		debug_int(r);
+		debug("expecting:");
+		debug_int(status);
 		return false
 	}
 
-	if (status >= 0) {
-		ok = tokeq(s, t, numtok, expected); 
+	if(expected.length == 0) { // no expected to check against
+		return true;
 	}
 
-	// memory.free(); // free the stuff we allocated
-	return ok;
+	return tokeq(s, t, numtok, expected); 
 }
