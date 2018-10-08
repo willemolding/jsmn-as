@@ -56,8 +56,10 @@ export class JsmnParser {
  * Allocates a fresh unused token from the token pool.
  */
 export function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens: u32): JsmnToken {
-	if(parser.toknext > nTokens) {
-		unreachable();
+	if(parser.toknext >= nTokens) {
+		debug("No tokens remaining!");
+		return null;
+		// unreachable();
 	}
 	let tok: JsmnToken = tokens[parser.toknext++];
 	tok.start = -1;
@@ -116,10 +118,10 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		// 	return 0;
 		// }
 		token = jsmn_alloc_token(parser, tokens, nTokens);
-		// if (token == NULL) { // could not allocate a new token
-		// 	parser.pos = start;
-		// 	return JsmnErr.JSMN_ERROR_NOMEM;
-		// }
+		if (token == null) { // could not allocate a new token
+			parser.pos = start;
+			return JsmnErr.JSMN_ERROR_NOMEM;
+		}
 		jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, start, parser.pos);
 		token.parent = parser.toksuper;
 		parser.pos--;
@@ -151,10 +153,10 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 			// 	return 0;
 			// }
 			token = jsmn_alloc_token(parser, tokens, nTokens);
-			// if (tokens == NULL) {
-			// 	parser.pos = start;
-			// 	return JsmnErr.JSMN_ERROR_NOMEM;
-			// }
+			if (token == null) {
+				parser.pos = start;
+				return JsmnErr.JSMN_ERROR_NOMEM;
+			}
 			jsmn_fill_token(token, JsmnType.JSMN_STRING, start+1, parser.pos);
 			token.parent = parser.toksuper;
 			return 0;
@@ -217,8 +219,8 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 				// 	break;
 				// }
 				token = jsmn_alloc_token(parser, tokens, nTokens);
-				// if (tokens == NULL)
-				// 	return JsmnErr.JSMN_ERROR_NOMEM;
+				if (token == null)
+					return JsmnErr.JSMN_ERROR_NOMEM;
 				if (parser.toksuper != -1) {
 					tokens[parser.toksuper].size++;
 					token.parent = parser.toksuper;

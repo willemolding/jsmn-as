@@ -256,7 +256,7 @@ export function test_partial_string(): i32 {
   for (let i: i32 = 1; i <= js.length; i++) {
     r = jsmnParse(p, js, i, tok, nTokens);
     if (i == js.length) {
-      fails += check(r == 5);
+      fails += check(r == nTokens);
       fails += check(tokeq(js, tok, nTokens,
           [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'x'},
@@ -266,6 +266,78 @@ export function test_partial_string(): i32 {
     } else {
       fails += check(r == JsmnErr.JSMN_ERROR_PART);
     }
+  }
+  return fails;
+}
+
+export function test_partial_array(): i32 {
+  let r: i32;
+  let p = new JsmnParser();
+  let fails: i32 = 0;
+  let success: i32 = 0;
+
+  const nTokens = 6;
+  let tok = new Array<JsmnToken>(nTokens);
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+
+  const js: string = '[ 1, true, [123, "hello"]]';
+
+  for (let i: i32 = 1; i <= js.length; i++) {
+    r = jsmnParse(p, js, i, tok, nTokens);
+    if (i == js.length) {
+      fails += check(r == nTokens);
+      fails += check(tokeq(js, tok, nTokens,
+          [{type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 3, value: ''},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '1'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: 'true'},
+          {type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 2, value: ''},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '123'},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'hello'}]));
+    } else {
+      fails += check(r == JsmnErr.JSMN_ERROR_PART);
+    }
+  }
+  return fails;
+}
+
+export function test_array_nomem(): i32 {
+  let r: i32;
+
+  let fails: i32 = 0;
+  let success: i32 = 0;
+
+  const nTokens = 6;
+  let tokSmall = new Array<JsmnToken>(nTokens);
+  let tokLarge = new Array<JsmnToken>(nTokens);
+
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tokSmall[j] = new JsmnToken();
+  for(let j=0; j<nTokens; ++j) tokLarge[j] = new JsmnToken();
+
+
+  const js: string = '[ 1, true, [123, "hello"]]';
+
+  for (let i: i32 = 0; i < nTokens; i++) {
+    let p = new JsmnParser();
+
+    r = jsmnParse(p, js, js.length, tokSmall, i);
+
+    fails += check(r == JsmnErr.JSMN_ERROR_NOMEM);
+    debug_int(r);
+
+    p = new JsmnParser();
+
+    r = jsmnParse(p, js, js.length, tokLarge, nTokens);
+
+    fails += check(tokeq(js, tokLarge, nTokens,
+      [{type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 3, value: ''},
+      {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '1'},
+      {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: 'true'},
+      {type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 2, value: ''},
+      {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '123'},
+      {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'hello'}]));
+
   }
   return fails;
 }
