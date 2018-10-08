@@ -1,5 +1,5 @@
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse } from  '../index'
-import { debug } from './index'
+import { debug, debug_int } from './index'
 
 
 export class TestToken {
@@ -16,33 +16,42 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 		for (let i: i32 = 0; i < numtok; i++) {
 
 			if (tokens[i].type != expected[i].type) {
-				// printf("token %d type is %d, not %d\n", i, tokens[i].type, expected[i].type);
-				debug("token type not correct");
+				debug("token type not correct. Actual type was");
+				debug_int(tokens[i].type)
+				debug("expecting")
+				debug_int(expected[i].type)
 				return false;
 			}
 			if (expected[i].start >= 0 && expected[i].end >= 0) {
 				if (tokens[i].start != expected[i].start) {
-					// printf("token %d start is %d, not %d\n", i, tokens[i].start, expected[i].start);
-					debug("token start not correct");
+					debug("token start not correct. Actual start was");
+					debug_int(tokens[i].start)
+					debug("expecting")
+					debug_int(expected[i].start)
 					return false;
 				}
 				if (tokens[i].end != expected[i].end ) {
-					// printf("token %d end is %d, not %d\n", i, tokens[i].end, expected[i].end);
-					debug("token end not correct");
+					debug("token end not correct. Actual end was");
+					debug_int(tokens[i].end)
+					debug("expecting")
+					debug_int(expected[i].end)
 					return false;
 				}
 			}
 			if (expected[i].size && tokens[i].size != expected[i].size) {
-				debug("token size not correct");
-				// printf("token %d size is %d, not %d\n", i, tokens[i].size, expected[i].size);
+				debug("token size not correct. Actual size was");
+				debug_int(tokens[i].size)
+				debug("expecting")
+				debug_int(expected[i].size)
 				return false;
 			}
 
 			if (s != '' && expected[i].value != '') {
 				if (expected[i].value != s.substring(tokens[i].start, tokens[i].end)) {
-					// printf("token %d value is %.*s, not %s\n", i, tokens[i].end-tokens[i].start,
-					// 		s+tokens[i].start, value);
-					debug("token value not correct");
+					debug("token value not correct. Actual value was");
+					debug(s.substring(tokens[i].start, tokens[i].end))
+					debug("expecting")
+					debug(expected[i].value)
 					return false;
 				}
 			}

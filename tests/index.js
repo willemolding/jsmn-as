@@ -12,6 +12,9 @@ var ins = new WebAssembly.Instance(mod, {
             null, 
             new Uint16Array(ins.exports.memory.buffer.slice(offset, offset+(length*2))))
         );
+    },
+    debug_int: function(msg) {
+        console.log(msg);
     }
   }
 });

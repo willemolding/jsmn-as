@@ -5,6 +5,7 @@ import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse } from  '../index'
 
 declare namespace env {
   function debug(arg: i32, len: i32): void
+  function debug_int(msg: i32): void;
 }
 
 let token: JsmnToken = {
@@ -29,6 +30,10 @@ function check(val: boolean): i32 {
 
 export function debug(msg: string): void {
   env.debug(changetype<i32>(msg)+4, msg.length);
+}
+
+export function debug_int(msg: i32): void {
+  env.debug_int(msg);
 }
 
 export function test_something(): i32 {
