@@ -1,4 +1,4 @@
-import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnInit, jsmnParse } from  '../index'
+import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse } from  '../index'
 import { debug } from './index'
 
 

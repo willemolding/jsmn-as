@@ -2,7 +2,7 @@ import 'allocator/arena'
 
 import { tokeq, parse, TestToken } from './testutil'
 import { fail, done, check, test } from './test'
-import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnInit, jsmnParse } from  '../index'
+import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse } from  '../index'
 
 declare namespace env {
   function debug(arg: i32, len: i32): void
@@ -30,4 +30,8 @@ export function debug(msg: string): void {
 
 export function test_something(): i32 {
   return tokeq('{}', [token], 1, [testToken]) ? 0 : -1;
+}
+
+export function test_call_parse(): i32 {
+  return jsmnParse(new JsmnParser(), "", 0, [], 0);
 }
