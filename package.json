@@ -1,0 +1,21 @@
+{
+  "name": "jsmn-as",
+  "version": "0.1.0",
+  "author": {
+    "name": "Willem Olding",
+    "email": "willem.olding@holo.host"
+  },
+  "main": "index.ts",
+  "files": [
+    "index.ts"
+  ],
+  "license": "GPL-3.0",
+  "scripts": {
+    "build:tests": "asc tests/index.ts -b tests/build/untouched.wasm -t build/untouched.wat --validate --sourceMap --measure",
+    "test": "node tests"
+  },
+  "devDependencies": {
+    "assemblyscript": "github:AssemblyScript/assemblyscript",
+    "tape": "^4.9.1"
+  }
+}
