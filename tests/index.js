@@ -6,8 +6,13 @@ var fs = require("fs");
 var mod = new WebAssembly.Module(fs.readFileSync(__dirname + "/build/untouched.wasm"));
 var ins = new WebAssembly.Instance(mod, {
   env: {
-    memory: new WebAssembly.Memory({ initial: 1 }),
-    abort: function() { throw Error("abort called"); }
+    abort: function() { throw Error("abort called"); },
+    debug: function(offset, length) { 
+        console.log(String.fromCharCode.apply(
+            null, 
+            new Uint16Array(ins.exports.memory.buffer.slice(offset, offset+(length*2))))
+        );
+    }
   }
 });
 
