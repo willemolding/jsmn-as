@@ -1,13 +1,24 @@
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnInit, jsmnParse } from  '../index'
 
-function vtokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, va_list ap): i32 {
-	if (numtok > 0) {
-		int i, start, end, size;
-		int type;
-		char *value;
+export class TestToken {
+	type: JsmnType
+	value?: string
+	size?: i32
+	start?: i32
+	end?: i32
+}
 
-		size = -1;
-		value = NULL;
+
+function vtokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected: Array<TestToken>): i32 {
+	if (numtok > 0) {
+		let i: i32, 
+		start: i32, 
+		end: i32, 
+		size: i32 = -1,
+		type: i32;
+
+		let value: string = ''; // should really be a character
+
 		for (i = 0; i < numtok; i++) {
 			type = va_arg(ap, int);
 			if (type == JSMN_STRING) {
@@ -56,19 +67,15 @@ function vtokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, va_list ap): i
 	return 1;
 }
 
-function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, ...): i32 {
-	var ok: i32;
-	va_list args;
-	va_start(args, numtok);
-	ok = vtokeq(s, tokens, numtok, args); 
-	va_end(args);
+function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected: Array<TestToken>): i32 {
+	let ok: i32;
+	ok = vtokeq(s, tokens, numtok, expected); 
 	return ok;
 }
 
-function parse(s: string, status: i32, numtok: i32, ...): i32 {
-	var r: i32;
-	var ok: i32 = 1;
-	va_list args;
+function parse(s: string, status: i32, numtok: i32, expected: Array<TestToken>): i32 {
+	let r: i32;
+	let ok: i32 = 1;
 	const p: JsmnParser = new JsmnParser();
 	const t: Array<JsmnToken> = new Array<JsmnToken>(numtok);
 
@@ -80,9 +87,7 @@ function parse(s: string, status: i32, numtok: i32, ...): i32 {
 	}
 
 	if (status >= 0) {
-		va_start(args, numtok);
-		ok = vtokeq(s, t, numtok, args); 
-		va_end(args);
+		ok = vtokeq(s, t, numtok, expected); 
 	}
 
 	// memory.free(); // free the stuff we allocated
