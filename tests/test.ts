@@ -1,3 +1,5 @@
+import { debug } from './index'
+
 var test_passed: i32 = 0;
 var test_failed: i32 = 0;
 
@@ -29,6 +31,6 @@ export function test(func: () => i32, name: string): void {
 		test_passed++;
 	} else {
 		test_failed++;
-		// console.log("FAILED: %s (at line %d)\n", name, r);
+		// debug("FAILED: %s (at line %d)\n", name, r);
 	}
 }

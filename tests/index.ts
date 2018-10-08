@@ -11,7 +11,7 @@ declare namespace env {
 let token: JsmnToken = {
   type: JsmnType.JSMN_OBJECT,
   start: 0,
-  end: 1,
+  end: 2,
   size: 2,
   parent: 0,
 }
@@ -19,7 +19,7 @@ let token: JsmnToken = {
 let testToken: TestToken = {
   type: JsmnType.JSMN_OBJECT,
   start: 0,
-  end: 1,
+  end: 2,
   size: 2,
   value: '{}'
 }
@@ -29,6 +29,5 @@ export function debug(msg: string): void {
 }
 
 export function test_something(): i32 {
-  debug("SUP from ts");
   return tokeq('{}', [token], 1, [testToken]) ? 0 : -1;
 }

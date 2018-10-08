@@ -1,4 +1,6 @@
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnInit, jsmnParse } from  '../index'
+import { debug } from './index'
+
 
 export class TestToken {
 	type: JsmnType
@@ -15,19 +17,23 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 
 			if (tokens[i].type != expected[i].type) {
 				// printf("token %d type is %d, not %d\n", i, tokens[i].type, expected[i].type);
+				debug("token type not correct");
 				return false;
 			}
 			if (expected[i].start && expected[i].end) {
 				if (tokens[i].start != expected[i].start) {
 					// printf("token %d start is %d, not %d\n", i, tokens[i].start, expected[i].start);
+					debug("token start not correct");
 					return false;
 				}
 				if (tokens[i].end != expected[i].end ) {
 					// printf("token %d end is %d, not %d\n", i, tokens[i].end, expected[i].end);
+					debug("token end not correct");
 					return false;
 				}
 			}
 			if (expected[i].size && tokens[i].size != expected[i].size) {
+				debug("token size not correct");
 				// printf("token %d size is %d, not %d\n", i, tokens[i].size, expected[i].size);
 				return false;
 			}
@@ -36,6 +42,7 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 				if (expected[i].value != s.substring(tokens[i].start, tokens[i].end)) {
 					// printf("token %d value is %.*s, not %s\n", i, tokens[i].end-tokens[i].start,
 					// 		s+tokens[i].start, value);
+					debug("token value not correct");
 					return false;
 				}
 			}
