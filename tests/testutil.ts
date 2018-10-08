@@ -24,7 +24,7 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 				debug_int(expected[i].type)
 				return false;
 			}
-			if (expected[i].start >= 0 && expected[i].end >= 0) {
+			if (expected[i].start != -1 && expected[i].end != -1) {
 				if (tokens[i].start != expected[i].start) {
 					debug("token start not correct. Actual start was");
 					debug_int(tokens[i].start)
@@ -40,7 +40,7 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 					return false;
 				}
 			}
-			if (expected[i].size && tokens[i].size != expected[i].size) {
+			if (expected[i].size != -1 && tokens[i].size != expected[i].size) {
 				debug("token size not correct. Actual size was");
 				debug_int(tokens[i].size)
 				debug("expecting")

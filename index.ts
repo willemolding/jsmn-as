@@ -96,8 +96,10 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 			case ','.charCodeAt(0): case ']'.charCodeAt(0): case '}'.charCodeAt(0):
 				// goto found;
 				debug("found end of primitive");
+				found = true;
 				break;
 		}
+		if (found) break; // needed to break out of both levels
 		if (js.charCodeAt(parser.pos) < 32 || js.charCodeAt(parser.pos) >= 127) {
 			parser.pos = start;
 			return JsmnErr.JSMN_ERROR_INVAL;
@@ -105,23 +107,24 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 	}
 	/* In strict mode primitive must be followed by a comma/object/array */
 	// This is if the for loop exits without found being flagged
-	// parser.pos = start;
-	// return JsmnErr.JSMN_ERROR_PART;
-
-// found:
-	// if (tokens == NULL) {
-	// 	parser.pos--;
-	// 	return 0;
-	// }
-	token = jsmn_alloc_token(parser, tokens, nTokens);
-	// if (token == NULL) {
-	// 	parser.pos = start;
-	// 	return JsmnErr.JSMN_ERROR_NOMEM;
-	// }
-	jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, start, parser.pos);
-	token.parent = parser.toksuper;
-	parser.pos--;
-	return 0;
+	if(!found) {
+		parser.pos = start;
+		return JsmnErr.JSMN_ERROR_PART;		
+	} else {
+		// if (tokens == NULL) { // how can tokens become null!!
+		// 	parser.pos--;
+		// 	return 0;
+		// }
+		token = jsmn_alloc_token(parser, tokens, nTokens);
+		// if (token == NULL) { // could not allocate a new token
+		// 	parser.pos = start;
+		// 	return JsmnErr.JSMN_ERROR_NOMEM;
+		// }
+		jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, start, parser.pos);
+		token.parent = parser.toksuper;
+		parser.pos--;
+		return 0;
+	}
 }
 
 
@@ -283,6 +286,8 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 					}
 				}
 				r = jsmn_parse_primitive(parser, js, len, tokens, nTokens);
+				debug("r:");
+				debug_int(r);
 				if (r < 0) return r;
 				count++;
 				if (parser.toksuper != -1)// && tokens != NULL)
