@@ -67,6 +67,11 @@ export function parse(s: string, status: i32, numtok: i32, expected: Array<TestT
 	let p: JsmnParser = new JsmnParser();
 	let t: Array<JsmnToken> = new Array<JsmnToken>(numtok);
 
+	// allocate the new tokens
+	for(let i = 0; i < numtok; ++i) {
+		t[i] = new JsmnToken();
+	}
+
 	r = jsmnParse(p, s, s.length, t, numtok);
 	if (r != status) {
 		debug("status code not ok. Actual status code:");

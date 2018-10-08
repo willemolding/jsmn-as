@@ -55,7 +55,7 @@ export class JsmnParser {
 /**
  * Allocates a fresh unused token from the token pool.
  */
-function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens: u32): JsmnToken {
+export function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens: u32): JsmnToken {
 	if(parser.toknext > nTokens) {
 		unreachable();
 	}
@@ -70,7 +70,7 @@ function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens:
 /**
  * Fills token type and boundaries.
  */
-function jsmn_fill_token(token: JsmnToken, type: JsmnType,
+export function jsmn_fill_token(token: JsmnToken, type: JsmnType,
                             start: i32, end: i32): void {
 	token.type = type;
 	token.start = start;
