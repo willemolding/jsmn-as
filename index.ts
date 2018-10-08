@@ -1,4 +1,4 @@
-
+import { debug, debug_int } from './tests/index'
 /*================================
 =            Typedefs            =
 ================================*/
@@ -84,6 +84,7 @@ export function jsmn_fill_token(token: JsmnToken, type: JsmnType,
  */
 function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
+	debug("begin parse primitive");
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
 	let found: boolean = false;
@@ -131,6 +132,8 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
  */
 function jsmn_parse_string(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
+	debug("begin parse string");
+
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
 
@@ -189,11 +192,6 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 	parser.pos = start;
 	return JsmnErr.JSMN_ERROR_PART;
 }
-
-
-
-
-
 
 
 export function jsmnParse(parser: JsmnParser, js: string, len: u32,

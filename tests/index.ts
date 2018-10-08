@@ -39,7 +39,7 @@ export function debug_int(msg: i32): void {
 
 
 
-export function test_fill_token(): i32 {
+export function test_jsmn_fill_token(): i32 {
   let token: JsmnToken = new JsmnToken();
   jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, 1, 2);
   return check(
@@ -47,6 +47,18 @@ export function test_fill_token(): i32 {
     && token.start == 1 
     && token.end == 2
     && token.size == 0)
+}
+
+export function test_jsmn_alloc_token(): i32 {
+  let tokens: Array<JsmnToken> = new Array<JsmnToken>(1);
+  tokens[0] = new JsmnToken();
+  let parser = new JsmnParser();
+  let allocToken = jsmn_alloc_token(parser, tokens, 1);
+  return check(
+    allocToken.start == -1
+    && allocToken.end == -1
+    && allocToken.size == 0
+    && allocToken.parent == -1)
 }
 
 export function test_call_parse(): i32 {
@@ -61,15 +73,15 @@ export function test_call_parse(): i32 {
 
 
 export function test_empty_1(): i32 {
-  return check(parse('{}\0', 1, 1,
+  return check(parse('{}', 1, 1,
         [{type: JsmnType.JSMN_OBJECT, start: 0, end: 2, size: 0, value: ''}]));
 }
 export function test_empty_2(): i32 {
-  return check(parse('[]\0', 1, 1,
+  return check(parse('[]', 1, 1,
         [{type: JsmnType.JSMN_ARRAY, start: 0, end: 2, size: 0, value: ''}]));
 }
 export function test_empty_3(): i32 {
-  return check(parse('[{},{}]\0', 3, 3,
+  return check(parse('[{},{}]', 3, 3,
         [{type: JsmnType.JSMN_ARRAY, start: 0, end: 7, size: 2, value: ''},
           {type: JsmnType.JSMN_OBJECT, start: 1, end: 3, size: 0, value: ''},
           {type: JsmnType.JSMN_OBJECT, start: 4, end: 6, size: 0, value: ''}]));
@@ -77,18 +89,18 @@ export function test_empty_3(): i32 {
 
 /*----------  test_object  ----------*/
 
-// export function test_object_1(): i32 {
-//   return check(parse('{"a":0}\0', 3, 3,
-//         [{type: JsmnType.JSMN_OBJECT, start: 0, end: 7, size: 1, value: ''},
-//           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: -1, value: 'a'},
-//           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '0'}]));
-// }
-// export function test_object_2(): i32 {
-//   return check(parse('{"a":[]}\0', 3, 3,
-//         [{type: JsmnType.JSMN_OBJECT, start: 0, end: 8, size: 1, value: ''},
-//           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
-//           {type: JsmnType.JSMN_PRIMITIVE, start: 5, end: 7, size: 0, value: ''}]));
-// }
+export function test_object_1(): i32 {
+  return check(parse('{"a":0}', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: 0, end: 7, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
+          {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '0'}]));
+}
+export function test_object_2(): i32 { 
+  return check(parse('{"a":[]}', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: 0, end: 8, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
+          {type: JsmnType.JSMN_ARRAY, start: 5, end: 7, size: 0, value: ''}]));
+}
 
 /*----------  test_array  ----------*/
 
