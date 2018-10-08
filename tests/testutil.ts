@@ -20,7 +20,7 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 				debug("token type not correct");
 				return false;
 			}
-			if (expected[i].start && expected[i].end) {
+			if (expected[i].start >= 0 && expected[i].end >= 0) {
 				if (tokens[i].start != expected[i].start) {
 					// printf("token %d start is %d, not %d\n", i, tokens[i].start, expected[i].start);
 					debug("token start not correct");
@@ -55,10 +55,9 @@ export function tokeq(s: string, tokens: Array<JsmnToken>, numtok: i32, expected
 export function parse(s: string, status: i32, numtok: i32, expected: Array<TestToken>): boolean {
 	let r: i32;
 	let ok: boolean = false;
-	const p: JsmnParser = new JsmnParser();
-	const t: Array<JsmnToken> = new Array<JsmnToken>(numtok);
+	let p: JsmnParser = new JsmnParser();
+	let t: Array<JsmnToken> = new Array<JsmnToken>(numtok);
 
-	jsmnInit(p);
 	r = jsmnParse(p, s, s.length, t, numtok);
 	if (r != status) {
 		// printf("status is %d, not %d\n", r, status);
