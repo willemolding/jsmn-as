@@ -286,8 +286,6 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 					}
 				}
 				r = jsmn_parse_primitive(parser, js, len, tokens, nTokens);
-				debug("r:");
-				debug_int(r);
 				if (r < 0) return r;
 				count++;
 				if (parser.toksuper != -1)// && tokens != NULL)
