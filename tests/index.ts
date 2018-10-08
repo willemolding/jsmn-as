@@ -1,7 +1,7 @@
 import 'allocator/arena'
 
 import { tokeq, parse, TestToken } from './testutil'
-import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, jsmn_fill_token, jsmn_alloc_token } from  '../index'
+import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, allocateTokenArray, freeTokenArray } from  '../index'
 
 declare namespace env {
   function debug(arg: i32, len: i32): void
@@ -36,28 +36,6 @@ export function debug_int(msg: i32): void {
   env.debug_int(msg);
 }
 
-
-export function test_jsmn_fill_token(): i32 {
-  let token: JsmnToken = new JsmnToken();
-  jsmn_fill_token(token, JsmnType.JSMN_PRIMITIVE, 1, 2);
-  return check(
-    token.type == JsmnType.JSMN_PRIMITIVE 
-    && token.start == 1 
-    && token.end == 2
-    && token.size == 0)
-}
-
-export function test_jsmn_alloc_token(): i32 {
-  let tokens: Array<JsmnToken> = new Array<JsmnToken>(1);
-  tokens[0] = new JsmnToken();
-  let parser = new JsmnParser();
-  let allocToken = jsmn_alloc_token(parser, tokens, 1);
-  return check(
-    allocToken.start == -1
-    && allocToken.end == -1
-    && allocToken.size == 0
-    && allocToken.parent == -1)
-}
 
 export function test_call_parse(): i32 {
   return jsmnParse(new JsmnParser(), "", 0, [], 0);
@@ -247,9 +225,7 @@ export function test_partial_string(): i32 {
   let success: i32 = 0;
 
   const nTokens = 5;
-  let tok = new Array<JsmnToken>(nTokens);
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+  let tok = allocateTokenArray(nTokens);
 
   const js: string = '{"x": "va\\\\ue", "y": "value y"}';
 
@@ -277,10 +253,7 @@ export function test_partial_array(): i32 {
   let success: i32 = 0;
 
   const nTokens = 6;
-  let tok = new Array<JsmnToken>(nTokens);
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
-
+  let tok = allocateTokenArray(nTokens);
   const js: string = '[ 1, true, [123, "hello"]]';
 
   for (let i: i32 = 1; i <= js.length; i++) {
@@ -308,12 +281,9 @@ export function test_array_nomem(): i32 {
   let success: i32 = 0;
 
   const nTokens = 6;
-  let tokSmall = new Array<JsmnToken>(nTokens);
-  let tokLarge = new Array<JsmnToken>(nTokens);
+  let tokSmall = allocateTokenArray(nTokens);
+  let tokLarge = allocateTokenArray(nTokens);
 
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tokSmall[j] = new JsmnToken();
-  for(let j=0; j<nTokens; ++j) tokLarge[j] = new JsmnToken();
 
 
   const js: string = '[ 1, true, [123, "hello"]]';
@@ -345,11 +315,7 @@ export function test_array_nomem(): i32 {
 
 export function test_issue_22(): i32 {
   const nTokens = 128;
-  let tok = new Array<JsmnToken>(nTokens);
-
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
-
+  let tok = allocateTokenArray(nTokens);
 
   const js: string = `{ "height":10, "layers":[ { "data":[6,6], "height":10, \
    "name":"Calque de Tile 1", "opacity":1, "type":"tilelayer", \
@@ -376,10 +342,7 @@ export function test_issue_27(): i32 {
 
 export function test_input_length(): i32 {
   const nTokens = 10;
-  let tok = new Array<JsmnToken>(nTokens);
-
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+  let tok = allocateTokenArray(nTokens);
 
 
   const js: string = '{"a": 0}garbage';
@@ -397,10 +360,8 @@ export function test_input_length(): i32 {
 export function test_count(): i32 {
 
   const nTokens = 10;
-  let tok = new Array<JsmnToken>(nTokens);
+  let tok = allocateTokenArray(nTokens);
 
-  // allocate tokens...
-  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
 
   let js: string;
   let fails: i32 = 0;

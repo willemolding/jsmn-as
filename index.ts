@@ -1,4 +1,3 @@
-import { debug, debug_int } from './tests/index'
 /*================================
 =            Typedefs            =
 ================================*/
@@ -52,14 +51,26 @@ export class JsmnParser {
 
 /*=====  End of Typedefs  ======*/
 
+
+// helper for setting up
+export function allocateTokenArray(nTokens: i32): Array<JsmnToken> {
+	let arr = new Array<JsmnToken>(nTokens);
+	for(let i=0; i<nTokens; ++i) arr[i] = new JsmnToken();
+	return arr;
+}
+
+// helper for tearing down
+export function freeTokenArray(arr: Array<JsmnToken>): void {
+	for(let i=0; i<arr.length; ++i) memory.free(changetype<usize>(arr[i]));
+	memory.free(changetype<usize>(arr));
+}
+
 /**
  * Allocates a fresh unused token from the token pool.
  */
-export function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens: u32): JsmnToken {
+function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, nTokens: u32): JsmnToken {
 	if(parser.toknext >= nTokens) {
-		debug("No tokens remaining!");
 		return null;
-		// unreachable();
 	}
 	let tok: JsmnToken = tokens[parser.toknext++];
 	tok.start = -1;
@@ -72,7 +83,7 @@ export function jsmn_alloc_token(parser: JsmnParser, tokens: Array<JsmnToken>, n
 /**
  * Fills token type and boundaries.
  */
-export function jsmn_fill_token(token: JsmnToken, type: JsmnType,
+function jsmn_fill_token(token: JsmnToken, type: JsmnType,
                             start: i32, end: i32): void {
 	token.type = type;
 	token.start = start;
@@ -86,18 +97,16 @@ export function jsmn_fill_token(token: JsmnToken, type: JsmnType,
  */
 function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
-	debug("begin parse primitive");
+	
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
 	let found: boolean = false;
 
 	for (; parser.pos < len; parser.pos++) {
-		debug(js[parser.pos]);
+	
 		switch (js.charCodeAt(parser.pos)) {
 			case '\t'.charCodeAt(0): case '\r'.charCodeAt(0): case '\n'.charCodeAt(0): case ' '.charCodeAt(0):
 			case ','.charCodeAt(0): case ']'.charCodeAt(0): case '}'.charCodeAt(0):
-				// goto found;
-				debug("found end of primitive");
 				found = true;
 				break;
 		}
@@ -113,10 +122,10 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		parser.pos = start;
 		return JsmnErr.JSMN_ERROR_PART;		
 	} else {
-		// if (tokens == NULL) { // how can tokens become null!!
-		// 	parser.pos--;
-		// 	return 0;
-		// }
+		if (tokens == null) {
+			parser.pos--;
+			return 0;
+		}
 		token = jsmn_alloc_token(parser, tokens, nTokens);
 		if (token == null) { // could not allocate a new token
 			parser.pos = start;
@@ -135,7 +144,7 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
  */
 function jsmn_parse_string(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
-	debug("begin parse string");
+	
 
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
@@ -145,13 +154,13 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 	/* Skip starting quote */
 	for (; parser.pos < len; parser.pos++) {
 		let c: i32 = js.charCodeAt(parser.pos);
-		debug(js[parser.pos]);
+		
 		/* Quote: end of string */
 		if (c == '\"'.charCodeAt(0)) {
-			debug("Found end of string")
-			// if (tokens == NULL) {
-			// 	return 0;
-			// }
+			
+			if (tokens == null) {
+				return 0;
+			}
 			token = jsmn_alloc_token(parser, tokens, nTokens);
 			if (token == null) {
 				parser.pos = start;
@@ -209,15 +218,14 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	for (; parser.pos < len; parser.pos++) {
 		let c: i32
 		let type: JsmnType;
-		debug(js[parser.pos]);
+		
 		c = js.charCodeAt(parser.pos);
 		switch (c) {
 			case '{'.charCodeAt(0): case '['.charCodeAt(0):
-				debug("begin object/array")
 				count++;
-				// if (tokens == NULL) {
-				// 	break;
-				// }
+				if (tokens == null) {
+					break;
+				}
 				token = jsmn_alloc_token(parser, tokens, nTokens);
 				if (token == null)
 					return JsmnErr.JSMN_ERROR_NOMEM;
@@ -230,9 +238,8 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 				parser.toksuper = parser.toknext - 1;
 				break;
 			case '}'.charCodeAt(0): case ']'.charCodeAt(0):
-				debug("found end of object/array")
-				// if (tokens == NULL)
-				// 	break;
+				if (tokens == null)
+					break;
 				type = (c == '}'.charCodeAt(0) ? JsmnType.JSMN_OBJECT : JsmnType.JSMN_ARRAY);
 				if (parser.toknext < 1) {
 					return JsmnErr.JSMN_ERROR_INVAL;
@@ -260,7 +267,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 				r = jsmn_parse_string(parser, js, len, tokens, nTokens);
 				if (r < 0) return r;
 				count++;
-				if (parser.toksuper != -1)// && tokens != NULL)
+				if (parser.toksuper != -1 && tokens != null)
 					tokens[parser.toksuper].size++;
 				break;
 			case '\t'.charCodeAt(0) : case '\r'.charCodeAt(0) : case '\n'.charCodeAt(0) : case ' '.charCodeAt(0):
@@ -280,7 +287,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 			case '5'.charCodeAt(0): case '6'.charCodeAt(0): case '7'.charCodeAt(0): case '8'.charCodeAt(0): case '9'.charCodeAt(0):
 			case 't'.charCodeAt(0): case 'f'.charCodeAt(0): case 'n'.charCodeAt(0):
 				/* And they must not be keys of the object */
-				if (parser.toksuper != -1) {// && tokens != NULL) {
+				if (parser.toksuper != -1 && tokens != null) {
 					let t: JsmnToken = tokens[parser.toksuper];
 					if (t.type == JsmnType.JSMN_OBJECT ||
 							(t.type == JsmnType.JSMN_STRING && t.size != 0)) {
@@ -290,7 +297,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 				r = jsmn_parse_primitive(parser, js, len, tokens, nTokens);
 				if (r < 0) return r;
 				count++;
-				if (parser.toksuper != -1)// && tokens != NULL)
+				if (parser.toksuper != -1 && tokens != null)
 					tokens[parser.toksuper].size++;
 				break;
 
@@ -300,14 +307,14 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 		}
 	}
 
-	// if (tokens != NULL) {
-	for (i = parser.toknext - 1; i >= 0; i--) {
-		 //Unmatched opened object or array 
-		if (tokens[i].start != -1 && tokens[i].end == -1) {
-			return JsmnErr.JSMN_ERROR_PART;
+	if (tokens != null) {
+		for (i = parser.toknext - 1; i >= 0; i--) {
+			 //Unmatched opened object or array 
+			if (tokens[i].start != -1 && tokens[i].end == -1) {
+				return JsmnErr.JSMN_ERROR_PART;
+			}
 		}
 	}
-	// }
 
 	return count;
 

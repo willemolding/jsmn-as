@@ -1,4 +1,4 @@
-import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse } from  '../index'
+import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, allocateTokenArray} from  '../index'
 import { debug, debug_int } from './index'
 
 
@@ -64,12 +64,8 @@ export function parse(s: string, status: i32, numtok: i32, expected: Array<TestT
 	let r: i32;
 	let ok: boolean = false;
 	let p: JsmnParser = new JsmnParser();
-	let t: Array<JsmnToken> = new Array<JsmnToken>(numtok);
+  	let t = allocateTokenArray(numtok);
 
-	// allocate the new tokens
-	for(let i = 0; i < numtok; ++i) {
-		t[i] = new JsmnToken();
-	}
 
 	r = jsmnParse(p, s, s.length, t, numtok);
 	if (r != status) {
