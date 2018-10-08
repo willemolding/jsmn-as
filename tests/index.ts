@@ -104,11 +104,21 @@ export function test_object_2(): i32 {
 
 /*----------  test_array  ----------*/
 
-// export function test_array_1(): i32 {
-//   return check(parse('[10]\0', 2, 2,
-//         [{type: JsmnType.JSMN_ARRAY, start: -1, end: -1, size: 1, value: ''},
-//         {type: JsmnType.JSMN_PRIMITIVE, start: 0, end: 0, size: 0, value: '10'}]));
-// }
+export function test_array_1(): i32 {
+  return check(parse('[123]', 2, 2,
+        [{type: JsmnType.JSMN_ARRAY, start: 0, end: 5, size: 1, value: ''},
+        {type: JsmnType.JSMN_PRIMITIVE, start: 0, end: 0, size: 0, value: '123'}]));
+}
+
+/*----------  test_string  ----------*/
+
+export function test_string_1(): i32 {
+  return check(parse('{"strVar" : "hello world"}', 3, 3,
+        [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 1, value: ''},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'strVar'},
+          {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 0, value: 'hello world'}]));
+}
+
 
 // export function test_array_2(): i32 {
 //   return check(parse('{"a": 1]\0', JsmnErr.JSMN_ERROR_INVAL, 3, [])); 

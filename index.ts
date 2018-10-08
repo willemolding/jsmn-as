@@ -89,13 +89,13 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 	let start: i32 = parser.pos;
 	let found: boolean = false;
 	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
-
+		debug(js[parser.pos]);
 		switch (js.charCodeAt(parser.pos)) {
 			/* In strict mode primitive must be followed by "," or "}" or "]" */
-			case ':'.charCodeAt(0):
 			case '\t'.charCodeAt(0) : case '\r'.charCodeAt(0) : case '\n'.charCodeAt(0) : case ' '.charCodeAt(0) :
 			case ','.charCodeAt(0)  : case ']'.charCodeAt(0)  : case '}'.charCodeAt(0) :
 				found = true;
+				debug("found end of primitive")
 				break;
 		}
 		if (js.charCodeAt(parser.pos) < 32 || js.charCodeAt(parser.pos) >= 127) {
@@ -142,9 +142,10 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 	/* Skip starting quote */
 	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
 		let c: i32 = js.charCodeAt(parser.pos);
-
+		debug(js[parser.pos]);
 		/* Quote: end of string */
 		if (c == '\"'.charCodeAt(0)) {
+			debug("Found end of string")
 			// if (tokens == NULL) {
 			// 	return 0;
 			// }
@@ -205,10 +206,11 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	for (; parser.pos < len && js.charCodeAt(parser.pos) != '\0'.charCodeAt(0); parser.pos++) {
 		let c: i32
 		let type: JsmnType;
-
+		debug(js[parser.pos]);
 		c = js.charCodeAt(parser.pos);
 		switch (c) {
 			case '{'.charCodeAt(0): case '['.charCodeAt(0):
+				debug("begin object/array")
 				count++;
 				// if (tokens == NULL) {
 				// 	break;
@@ -225,6 +227,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 				parser.toksuper = parser.toknext - 1;
 				break;
 			case '}'.charCodeAt(0): case ']'.charCodeAt(0):
+				debug("found end of object/array")
 				// if (tokens == NULL)
 				// 	break;
 				type = (c == '}'.charCodeAt(0) ? JsmnType.JSMN_OBJECT : JsmnType.JSMN_ARRAY);
