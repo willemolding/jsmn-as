@@ -343,4 +343,35 @@ export function test_array_nomem(): i32 {
 }
 
 
+export function test_issue_22(): i32 {
+  const nTokens = 128;
+  let tok = new Array<JsmnToken>(nTokens);
+
+  // allocate tokens...
+  for(let j=0; j<nTokens; ++j) tok[j] = new JsmnToken();
+
+
+  const js: string = `{ "height":10, "layers":[ { "data":[6,6], "height":10, \
+   "name":"Calque de Tile 1", "opacity":1, "type":"tilelayer", \
+   "visible":true, "width":10, "x":0, "y":0 }], \
+   "orientation":"orthogonal", "properties": { }, "tileheight":32, \
+   "tilesets":[ { "firstgid":1, "image":"..\\/images\\/tiles.png", \
+   "imageheight":64, "imagewidth":160, "margin":0, "name":"Tiles", \
+   "properties":{}, "spacing":0, "tileheight":32, "tilewidth":32 }], \
+   "tilewidth":32, "version":1, "width":10 }`;
+
+    let p = new JsmnParser();
+
+    let r: i32 = jsmnParse(p, js, js.length, tok, 128);
+    debug_int(r);
+    return(check(r>0));
+}
+
+export function test_issue_27(): i32 {
+  return check(
+    parse('{ "name" : "Jack", "age" : 27 } { "name" : "Anna", ', 
+    JsmnErr.JSMN_ERROR_PART, 8, []));
+}
+
+
 /*=====  End of Ported Tests  ======*/
