@@ -8,7 +8,15 @@ import {
 
 
 export function stringify<T>(x: T): string {
-	if(x == null) {
+
+	if(sizeof<T>() == 1) { // bools are only one byte so this is how we detect them
+		if (x) {
+			return 'true'
+			
+		} else {
+			return 'false'
+		}
+	} else if(x == null) {
 		return 'null'
 	} else if(isString<T>(x)) {
 		return '"'+<string>x+'"';
@@ -28,10 +36,6 @@ export function stringify<T>(x: T): string {
 
 	} else if (isReference<T>(x)) { // must be an object if it is a reference but not a string or array
 		return x.toString();
-	} else if (x) {
-		return 'true'
-		
-	} else {
-		return 'false'
 	}
+	return 'unknown_type'
 }
