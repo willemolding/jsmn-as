@@ -11,7 +11,7 @@
   ],
   "license": "GPL-3.0",
   "scripts": {
-    "build:tests": "asc tests/index.ts -b tests/build/untouched.wasm -t tests/build/untouched.wat --validate --sourceMap --measure",
+    "build:tests": "asc tests/index.ts -b tests/build/untouched.wasm -t tests/build/untouched.wat --transform transforms/serializable --validate --sourceMap --measure",
     "test": "node tests | tap-spec"
   },
   "devDependencies": {

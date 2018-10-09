@@ -1,12 +1,9 @@
 import 'allocator/arena'
 
-import { tokeq, parse, TestToken } from './testutil'
+import { tokeq, parse, tokenize, TestToken } from './testutil'
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, allocateTokenArray, freeTokenArray } from  '../index'
-
-declare namespace env {
-  function debug(arg: i32, len: i32): void
-  function debug_int(msg: i32): void;
-}
+import { debug, debug_int } from './testutil'
+export { debug, debug_int } from './testutil'
 
 let token: JsmnToken = {
   type: JsmnType.JSMN_OBJECT,
@@ -26,14 +23,6 @@ let testToken: TestToken = {
 
 function check(val: boolean): i32 {
   return val ? 0 : -1;
-}
-
-export function debug(msg: string): void {
-  env.debug(changetype<i32>(msg)+4, msg.length);
-}
-
-export function debug_int(msg: i32): void {
-  env.debug_int(msg);
 }
 
 
@@ -71,13 +60,13 @@ export function test_object_1(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '0'}]));
 }
-export function test_object_2(): i32 { 
+export function test_object_2(): i32 {
   return check(parse('{"a":[]}', 3, 3,
         [{type: JsmnType.JSMN_OBJECT, start: 0, end: 8, size: 1, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
           {type: JsmnType.JSMN_ARRAY, start: 5, end: 7, size: 0, value: ''}]));
 }
-export function test_object_3(): i32 { 
+export function test_object_3(): i32 {
   return check(parse('{"a":{},"b":{}}', 5, 5,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
@@ -85,7 +74,7 @@ export function test_object_3(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'b'},
           {type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 0, value: ''}]));
 }
-export function test_object_4(): i32 { 
+export function test_object_4(): i32 {
   return check(parse('{\n "Day": 26,\n "Month": 9,\n "Year": 12\n }', 7, 7,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 3, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'Day'},
@@ -95,7 +84,7 @@ export function test_object_4(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'Year'},
           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '12'}]));
 }
-export function test_object_5(): i32 { 
+export function test_object_5(): i32 {
   return check(parse('{"a": 0, "b": "c"}', 5, 5,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
@@ -335,7 +324,7 @@ export function test_issue_22(): i32 {
 
 export function test_issue_27(): i32 {
   return check(
-    parse('{ "name" : "Jack", "age" : 27 } { "name" : "Anna", ', 
+    parse('{ "name" : "Jack", "age" : 27 } { "name" : "Anna", ',
     JsmnErr.JSMN_ERROR_PART, 8, []));
 }
 
@@ -434,3 +423,91 @@ export function test_unmatched_brackets(): i32 {
 }
 
 /*=====  End of Ported Tests  ======*/
+
+/*======================================
+=            Test stringify            =
+======================================*/
+
+import { stringify } from '../stringify'
+
+export function test_stringify_string(): i32 {
+  return check(stringify('abc') == '"abc"');
+}
+
+export function test_stringify_int(): i32 {
+  return check(stringify(10) == '10');
+}
+
+export function test_stringify_float(): i32 {
+  return check(stringify(10.123) == '10.123');
+}
+
+export function test_stringify_true(): i32 {
+  debug(stringify(true));
+  return check(stringify(true) == 'true');
+}
+
+export function test_stringify_false(): i32 {
+  debug(stringify(false));
+  return check(stringify(false) == 'false');
+}
+
+export function test_stringify_null(): i32 {
+  return check(stringify(null) == 'null');
+}
+
+export function test_stringify_array_int(): i32 {
+  let x: Array<i32> = [1,2,3];
+  return check(stringify(x) == '[1,2,3]');
+}
+
+export function test_stringify_array_float(): i32 {
+  let x: Array<f64> = [1.0,2.5,3.33333];
+  return check(stringify(x) == '[1.0,2.5,3.33333]');
+}
+
+export function test_stringify_array_array_int(): i32 {
+  let x: Array<Array<i32>> = [[1,2,3],[4,5,6]];
+  return check(stringify(x) == '[[1,2,3],[4,5,6]]');
+}
+
+@serializable
+class X {
+  a: string = "hi"
+  b: i32 = 10
+}
+
+export function test_stringify_object(): i32 {
+  let x: X = new X();
+  debug(stringify(x));
+  return check(stringify(x) == '{"a":"hi","b":10}');
+}
+
+@serializable
+class A {
+  a: string
+  b: B
+
+  constructor(a: string, p: string, q: i32) {
+    this.a = a
+    this.b = new B()
+    this.b.p = p;
+    this.b.q = q
+  }
+}
+
+@serializable
+class B {
+  p: string
+  q: i32
+}
+
+
+export function test_stringify_nested_objects(): i32 {
+  let a: A = new A("hi_a", "hi_b", 20);
+  debug(stringify(a));
+  return check(stringify(a) == '{"a":"hi_a","b":{"p":"hi_b","q":20}}');
+}
+
+
+/*=====  End of Test stringify  ======*/
