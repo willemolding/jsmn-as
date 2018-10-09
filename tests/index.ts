@@ -434,3 +434,91 @@ export function test_unmatched_brackets(): i32 {
 }
 
 /*=====  End of Ported Tests  ======*/
+
+
+import { stringify } from '../stringify'
+
+export function test_stringify_string(): i32 {
+  return check(stringify('abc') == '"abc"');
+}
+
+export function test_stringify_int(): i32 {
+  return check(stringify(10) == '10');
+}
+
+export function test_stringify_float(): i32 {
+  return check(stringify(10.123) == '10.123');
+}
+
+export function test_stringify_true(): i32 {
+  debug(stringify(true));
+  return check(stringify(true) == 'true');
+}
+
+export function test_stringify_false(): i32 {
+  debug(stringify(false));
+  return check(stringify(false) == 'false');
+}
+
+export function test_stringify_null(): i32 {
+  return check(stringify(null) == 'null');
+}
+
+export function test_stringify_array_int(): i32 {
+  let x: Array<i32> = [1,2,3];
+  return check(stringify(x) == '[1,2,3]');
+}
+
+export function test_stringify_array_float(): i32 {
+  let x: Array<f64> = [1.0,2.5,3.33333];
+  return check(stringify(x) == '[1.0,2.5,3.33333]');
+}
+
+export function test_stringify_array_array_int(): i32 {
+  let x: Array<Array<i32>> = [[1,2,3],[4,5,6]];
+  return check(stringify(x) == '[[1,2,3],[4,5,6]]');
+}
+
+class X {
+  a: string = "hi"
+  b: i32 = 10
+  toString(): string {
+    return '{"a":'+stringify(this.a)
+          +',"b":'+stringify(this.b)+'}'
+  }
+}
+export function test_stringify_object(): i32 {
+  let x: X = new X();
+  debug(stringify(x));
+  return check(stringify(x) == '{"a":"hi","b":10}');
+}
+
+
+class A {
+  a: string
+  b: B
+  constructor(a: string, p: string, q: i32) {
+    this.a = a
+    this.b = new B()
+    this.b.p = p;
+    this.b.q = q
+  }
+  toString(): string {
+    return '{"a":'+stringify(this.a)
+          +',"b":'+stringify(this.b)+'}'
+  }
+}
+class B {
+  p: string
+  q: i32
+  toString(): string {
+    return '{"p":'+stringify(this.p)
+          +',"q":'+stringify(this.q)+'}'
+  }
+}
+
+export function test_stringify_nested_objects(): i32 {
+  let a: A = new A("hi_a", "hi_b", 20);
+  debug(stringify(a));
+  return check(stringify(a) == '{"a":"hi_a","b":{"p":"hi_b","q":20}}');
+}
