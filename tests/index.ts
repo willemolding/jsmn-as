@@ -509,5 +509,11 @@ export function test_stringify_nested_objects(): i32 {
   return check(stringify(a) == '{"a":"hi_a","b":{"p":"hi_b","q":20}}');
 }
 
+export function test_stringify_array_of_objects(): i32 {
+  let a: Array<X> = [new X(), new X()]
+  debug(stringify(a))
+  return check(stringify(a) == '[{"a":"hi","b":10},{"a":"hi","b":10}]');
+
+}
 
 /*=====  End of Test stringify  ======*/
