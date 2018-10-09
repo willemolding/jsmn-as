@@ -486,6 +486,7 @@ export function test_stringify_object(): i32 {
 }
 
 
+@serializable
 class A {
   a: string
   b: B
@@ -495,18 +496,20 @@ class A {
     this.b.p = p;
     this.b.q = q
   }
-  toString(): string {
-    return '{"a":'+stringify(this.a)
-          +',"b":'+stringify(this.b)+'}'
-  }
+  // toString(): string {
+  //   return '{"a":'+stringify(this.a)
+  //         +',"b":'+stringify(this.b)+'}'
+  // }
 }
+
+@serializable
 class B {
   p: string
   q: i32
-  toString(): string {
-    return '{"p":'+stringify(this.p)
-          +',"q":'+stringify(this.q)+'}'
-  }
+  // toString(): string {
+  //   return '{"p":'+stringify(this.p)
+  //         +',"q":'+stringify(this.q)+'}'
+  // }
 }
 
 export function test_stringify_nested_objects(): i32 {
@@ -517,53 +520,3 @@ export function test_stringify_nested_objects(): i32 {
 
 
 /*=====  End of Test stringify  ======*/
-
-
-
-/*====================================
-=            Test marshal            =
-====================================*/
-
-@deserializable
-class C1 {
-  a: i32
-}
-
-@deserializable
-class C2 {
-  b: C1;
-  x: string;
-}
-
-@deserializable
-class C3 {
-  c: Array<i32>;
-  d: Array<C1>;
-}
-
-export function test_marshal_C1(): i32 {
-  let toks = allocateTokenArray(3)
-  const json = `{"a": 12345}`
-  tokenize(json, toks)
-  let o = marshal_C1(json, toks)
-  return check(o.a == 12345)
-}
-
-export function test_marshal_C2(): i32 {
-  let toks = allocateTokenArray(20)  // too many but who's counting?
-  const json = `{"x": "fooooo", "b": {"a": -32}}`
-  tokenize(json, toks)
-  let o = marshal_C2(json, toks)
-  return check(o.b.a == -32) || check(o.x.length === 6)
-}
-
-export function test_marshal_C3(): i32 {
-  let toks = allocateTokenArray(30)  // too many but who's counting?
-  const json = `{"c": [1,2,3], "d": [{"a": -1}, {"a": -2}]}`
-  tokenize(json, toks)
-  let o = marshal_C3(json, toks)
-  return check(o.c[1] == 2) || check(o.d[1].a == -2)
-}
-
-/*=====  End of Test marshal  ======*/
-
