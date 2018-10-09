@@ -12,7 +12,6 @@ export function stringify<T>(x: T): string {
 	if(sizeof<T>() == 1) { // bools are only one byte so this is how we detect them
 		if (x) {
 			return 'true'
-			
 		} else {
 			return 'false'
 		}
@@ -22,12 +21,9 @@ export function stringify<T>(x: T): string {
 		return '"'+<string>x+'"';
 	} else if (isInteger<T>(x)) {
 		return itoa(x);
-
 	} else if (isFloat<T>(x)) {
 		return dtoa(x);
-
 	} else if (isArray<T>(x)) {
-
 		let result = '[';
 		for(let i = 0; i < x.length; i++) {
 			result += stringify(x[i]) + (i < x.length - 1 ? ',' : '')

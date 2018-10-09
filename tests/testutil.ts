@@ -1,6 +1,17 @@
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, allocateTokenArray} from  '../index'
-import { debug, debug_int } from './index'
 
+declare namespace env {
+  function debug(arg: i32, len: i32): void
+  function debug_int(msg: i32): void;
+}
+
+export function debug(msg: string): void {
+  env.debug(changetype<i32>(msg)+4, msg.length);
+}
+
+export function debug_int(msg: i32): void {
+  env.debug_int(msg);
+}
 
 export class TestToken {
 	type: JsmnType
@@ -80,5 +91,16 @@ export function parse(s: string, status: i32, numtok: i32, expected: Array<TestT
 		return true;
 	}
 
-	return tokeq(s, t, numtok, expected); 
+	return tokeq(s, t, numtok, expected);
+}
+
+
+export function tokenize(json: string, toks: Array<JsmnToken>): i32 {
+  return jsmnParse(
+    new JsmnParser(),
+    json,
+    json.length,
+    toks,
+    toks.length
+  )
 }

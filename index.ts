@@ -100,13 +100,13 @@ function jsmn_fill_token(token: JsmnToken, type: JsmnType,
  */
 function jsmn_parse_primitive(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
-	
+
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
 	let found: boolean = false;
 
 	for (; parser.pos < len; parser.pos++) {
-	
+
 		switch (js.charCodeAt(parser.pos)) {
 			case '\t'.charCodeAt(0): case '\r'.charCodeAt(0): case '\n'.charCodeAt(0): case ' '.charCodeAt(0):
 			case ','.charCodeAt(0): case ']'.charCodeAt(0): case '}'.charCodeAt(0):
@@ -123,7 +123,7 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
 	// This is if the for loop exits without found being flagged
 	if(!found) {
 		parser.pos = start;
-		return JsmnErr.JSMN_ERROR_PART;		
+		return JsmnErr.JSMN_ERROR_PART;
 	} else {
 		if (tokens == null) {
 			parser.pos--;
@@ -147,7 +147,7 @@ function jsmn_parse_primitive(parser: JsmnParser, js: string,
  */
 function jsmn_parse_string(parser: JsmnParser, js: string,
 		len: u32, tokens: Array<JsmnToken>, nTokens: u32): i32 {
-	
+
 
 	let token: JsmnToken;
 	let start: i32 = parser.pos;
@@ -157,10 +157,10 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 	/* Skip starting quote */
 	for (; parser.pos < len; parser.pos++) {
 		let c: i32 = js.charCodeAt(parser.pos);
-		
+
 		/* Quote: end of string */
 		if (c == '\"'.charCodeAt(0)) {
-			
+
 			if (tokens == null) {
 				return 0;
 			}
@@ -212,7 +212,7 @@ function jsmn_parse_string(parser: JsmnParser, js: string,
 
 export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	tokens: Array<JsmnToken>, nTokens: u32): i32 {
-	
+
 	let r: i32;
 	let i: i32;
 	let token: JsmnToken;
@@ -221,7 +221,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 	for (; parser.pos < len; parser.pos++) {
 		let c: i32
 		let type: JsmnType;
-		
+
 		c = js.charCodeAt(parser.pos);
 		switch (c) {
 			case '{'.charCodeAt(0): case '['.charCodeAt(0):
@@ -312,7 +312,7 @@ export function jsmnParse(parser: JsmnParser, js: string, len: u32,
 
 	if (tokens != null) {
 		for (i = parser.toknext - 1; i >= 0; i--) {
-			 //Unmatched opened object or array 
+			 //Unmatched opened object or array
 			if (tokens[i].start != -1 && tokens[i].end == -1) {
 				return JsmnErr.JSMN_ERROR_PART;
 			}
