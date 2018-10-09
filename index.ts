@@ -1,7 +1,7 @@
 /*================================
 =            Typedefs            =
 ================================*/
-
+@unmanaged
 export enum JsmnType {
 	JSMN_UNDEFINED = 0,
 	JSMN_OBJECT = 1,
@@ -10,6 +10,7 @@ export enum JsmnType {
 	JSMN_PRIMITIVE = 4
 };
 
+@unmanaged
 export enum JsmnErr {
 	/* Not enough tokens were provided */
 	JSMN_ERROR_NOMEM = -1,
@@ -25,6 +26,7 @@ export enum JsmnErr {
  * start	start position in JSON data string
  * end		end position in JSON data string
  */
+@unmanaged
 export class JsmnToken {
 	type: JsmnType;
 	start: i32;
@@ -37,6 +39,7 @@ export class JsmnToken {
  * JSON parser. Contains an array of token blocks available. Also stores
  * the string being parsed now and current position in that string
  */
+@unmanaged
 export class JsmnParser {
 	pos: u32; /* offset in the JSON string */
 	toknext: u32; /* next token to allocate */
