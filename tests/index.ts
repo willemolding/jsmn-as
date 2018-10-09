@@ -471,46 +471,37 @@ export function test_stringify_array_array_int(): i32 {
   return check(stringify(x) == '[[1,2,3],[4,5,6]]');
 }
 
+@serializable
 class X {
   a: string = "hi"
   b: i32 = 10
-  toString(): string {
-    return '{"a":'+stringify(this.a)
-          +',"b":'+stringify(this.b)+'}'
-  }
 }
+
 export function test_stringify_object(): i32 {
   let x: X = new X();
   debug(stringify(x));
   return check(stringify(x) == '{"a":"hi","b":10}');
 }
 
-
 @serializable
 class A {
   a: string
   b: B
+
   constructor(a: string, p: string, q: i32) {
     this.a = a
     this.b = new B()
     this.b.p = p;
     this.b.q = q
   }
-  // toString(): string {
-  //   return '{"a":'+stringify(this.a)
-  //         +',"b":'+stringify(this.b)+'}'
-  // }
 }
 
 @serializable
 class B {
   p: string
   q: i32
-  // toString(): string {
-  //   return '{"p":'+stringify(this.p)
-  //         +',"q":'+stringify(this.q)+'}'
-  // }
 }
+
 
 export function test_stringify_nested_objects(): i32 {
   let a: A = new A("hi_a", "hi_b", 20);
