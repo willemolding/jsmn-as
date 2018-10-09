@@ -1,12 +1,9 @@
 import 'allocator/arena'
 
-import { tokeq, parse, TestToken } from './testutil'
+import { tokeq, parse, tokenize, TestToken } from './testutil'
 import { JsmnToken, JsmnParser, JsmnType, JsmnErr, jsmnParse, allocateTokenArray, freeTokenArray } from  '../index'
-
-declare namespace env {
-  function debug(arg: i32, len: i32): void
-  function debug_int(msg: i32): void;
-}
+import { debug, debug_int } from './testutil'
+export { debug, debug_int } from './testutil'
 
 let token: JsmnToken = {
   type: JsmnType.JSMN_OBJECT,
@@ -26,14 +23,6 @@ let testToken: TestToken = {
 
 function check(val: boolean): i32 {
   return val ? 0 : -1;
-}
-
-export function debug(msg: string): void {
-  env.debug(changetype<i32>(msg)+4, msg.length);
-}
-
-export function debug_int(msg: i32): void {
-  env.debug_int(msg);
 }
 
 
@@ -71,13 +60,13 @@ export function test_object_1(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '0'}]));
 }
-export function test_object_2(): i32 { 
+export function test_object_2(): i32 {
   return check(parse('{"a":[]}', 3, 3,
         [{type: JsmnType.JSMN_OBJECT, start: 0, end: 8, size: 1, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
           {type: JsmnType.JSMN_ARRAY, start: 5, end: 7, size: 0, value: ''}]));
 }
-export function test_object_3(): i32 { 
+export function test_object_3(): i32 {
   return check(parse('{"a":{},"b":{}}', 5, 5,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
@@ -85,7 +74,7 @@ export function test_object_3(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'b'},
           {type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 0, value: ''}]));
 }
-export function test_object_4(): i32 { 
+export function test_object_4(): i32 {
   return check(parse('{\n "Day": 26,\n "Month": 9,\n "Year": 12\n }', 7, 7,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 3, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'Day'},
@@ -95,7 +84,7 @@ export function test_object_4(): i32 {
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'Year'},
           {type: JsmnType.JSMN_PRIMITIVE, start: -1, end: -1, size: -1, value: '12'}]));
 }
-export function test_object_5(): i32 { 
+export function test_object_5(): i32 {
   return check(parse('{"a": 0, "b": "c"}', 5, 5,
         [{type: JsmnType.JSMN_OBJECT, start: -1, end: -1, size: 2, value: ''},
           {type: JsmnType.JSMN_STRING, start: -1, end: -1, size: 1, value: 'a'},
@@ -335,7 +324,7 @@ export function test_issue_22(): i32 {
 
 export function test_issue_27(): i32 {
   return check(
-    parse('{ "name" : "Jack", "age" : 27 } { "name" : "Anna", ', 
+    parse('{ "name" : "Jack", "age" : 27 } { "name" : "Anna", ',
     JsmnErr.JSMN_ERROR_PART, 8, []));
 }
 
@@ -434,3 +423,30 @@ export function test_unmatched_brackets(): i32 {
 }
 
 /*=====  End of Ported Tests  ======*/
+
+@deserializable
+class C1 {
+  a: i32
+}
+
+@deserializable
+class C2 {
+  b: C1;
+  x: string;
+}
+
+export function test_marshal_C1(): i32 {
+  let toks = allocateTokenArray(3)
+  const json = `{"a": 12345}`
+  tokenize(json, toks)
+  let o = marshal_C1(json, toks)
+  return check(o.a == 12345)
+}
+
+export function test_marshal_C2(): i32 {
+  let toks = allocateTokenArray(20)  // too many but who's counting?
+  const json = `{"x": "fooooo", "b": {"a": -32}}`
+  tokenize(json, toks)
+  let o = marshal_C2(json, toks)
+  return check(o.b.a == -32)
+}
