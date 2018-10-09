@@ -158,7 +158,7 @@ function builtinMarshalFuncs(structs) {
     assert(arrTok.type === JsmnType.JSMN_ARRAY)
     // TODO: check for empty array
 
-    while (toks.length > 0 && toks[0].start < arrTok.end) {
+    while (toks.length > 0 && toks[0].type != JsmnType.JSMN_UNDEFINED && toks[0].start < arrTok.end) {
       let v = marshalChild(json, toks)
       arr.push(v)
     }
@@ -215,8 +215,6 @@ function parametricTypeString(name, args) {
   return args && args.length > 0 ? `${name}<${args.join(',')}>` : name
 }
 
-let xyzzy = 666
-
 function buildMarshal(ty, struct) {
 
   const conditions = struct.map(([key, typeName, ...typeArgs]) => {
@@ -225,6 +223,8 @@ function buildMarshal(ty, struct) {
     return `(key == '${key}') {
       assert(valTok.type === ${jsmnType})
       obj.${key} = (${parseCall}(json, toks))
+      ${key == 'c' ? 'debug_int(obj.c.length)' : key == 'd' ? 'debug_int(obj.d.length)' : ''}
+      // ${key == 'c' ? 'debug_int(obj.c[2])' : key == 'd' ? 'debug_int(obj.d[0].a)' : ''}
     }`
   })
 
